@@ -10,8 +10,6 @@ class Config:
         root_dir = os.path.dirname(os.path.abspath(__file__))
         self.config_file_path = os.path.join(root_dir, 'config.ini')
 
-        self.load_config()
-
     def check_config(self):
         logger.info(f"Checking for config at {self.config_file_path}")
 
@@ -37,6 +35,7 @@ class Config:
         logger.info(f"Configuration file created at {self.config_file_path}")
 
     def load_config(self):
+        self.check_config()
 
         logger.info("Loading configuration file")
         self.config.read(self.config_file_path)
