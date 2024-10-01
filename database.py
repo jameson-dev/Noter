@@ -3,17 +3,20 @@ from loguru import logger
 
 
 class Database:
-        self.connection = MySQLdb.connect(
-            host=config.get('Database', 'db_host'),
-            user=config.get('Database', 'db_username'),
-            passwd=config.get('Database', 'db_password')
-        )
-        self.cursor = self.connection.cursor()
-        self.database_name = "notes"
-        self.check_database()
-        self.connection.select_db(self.database_name)
-        self.check_tables()
     def __init__(self, config):
+        try:
+            self.connection = MySQLdb.connect(
+                host=config.get('Database', 'db_host'),
+                user=config.get('Database', 'db_username'),
+                passwd=config.get('Database', 'db_password')
+            )
+            self.cursor = self.connection.cursor()
+            self.database_name = "notes"
+            self.check_database()
+            self.connection.select_db(self.database_name)
+            self.check_tables()
+        except Exception as e:
+            logger.error(e)
 
     def create_database(self):
         self.cursor.execute(f"CREATE DATABASE {self.database_name}")
