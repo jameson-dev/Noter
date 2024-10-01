@@ -7,7 +7,7 @@ from loguru import logger
 class Config:
     def __init__(self):
         self.config = configparser.ConfigParser()
-        root_dir = os.path.abspath(os.path.join(__file__))
+        root_dir = os.path.dirname(os.path.abspath(__file__))
         self.config_file_path = os.path.join(root_dir, 'config.ini')
 
         self.load_config()
