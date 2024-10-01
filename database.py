@@ -26,13 +26,13 @@ class Database:
             if fetch:
                 return self.cursor.fetchall()
         except MySQLdb.Error as e:
-            logger.error("Error executing query: {e}")
+            logger.error(f"Error executing query: {e}")
 
     def create_database(self):
         self.cursor.execute(f"CREATE DATABASE {self.database_name}")
         logger.info(f"Database '{self.database_name}' has been created.")
 
-    def create_tables(self, table_name, query):
+    def check_tables(self):
         required_tables = {
             'users': """
                 CREATE TABLE IF NOT EXISTS users (
@@ -88,11 +88,10 @@ class Database:
 
         for table_name, table_query in required_tables.items():
             if table_name in existing_tables:
-                logger.info(f"Table '{table_name} exists.")
+                logger.info(f"Table '{table_name}' exists.")
             else:
-                self.create_tables(table_name, table_query)
-
-        logger.info(f"Table '{table_name}' created.")
+                self.execute_query(table_query)
+                logger.info(f"Table {table_name}' created")
 
     def check_database(self):
         self.cursor.execute(f"SHOW DATABASES LIKE '{self.database_name}'")
@@ -102,21 +101,6 @@ class Database:
             logger.info(f"Database '{self.database_name}' exists.")
         else:
             self.create_database()
-
-    def check_tables(self):
-        required_tables = ['users', 'notes']
-
-        self.cursor.execute("SHOW TABLES")
-        existing_tables = [table[0] for table in self.cursor.fetchall()]
-
-        for table in required_tables:
-            if table in existing_tables:
-                logger.info(f"Table '{table}' exists.")
-            else:
-                if table == 'notes':
-                    self.create_tables(table)
-                elif table == 'users':
-                    self.create_tables(table)
 
     def close_conn(self):
         if self.cursor:
