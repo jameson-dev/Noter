@@ -1,5 +1,3 @@
-import os
-
 from notes import Notes
 from database import Database
 from loguru import logger
