@@ -29,8 +29,11 @@ class Database:
             logger.error(f"Error executing query: {e}")
 
     def create_database(self):
-        self.cursor.execute(f"CREATE DATABASE {self.database_name}")
-        logger.info(f"Database '{self.database_name}' has been created.")
+        try:
+            self.cursor.execute(f"CREATE DATABASE {self.database_name}")
+            logger.info(f"Database '{self.database_name}' has been created.")
+        except MySQLdb.Error as e:
+            logger.error(f"Error creating database: {e}")
 
     def check_tables(self):
         required_tables = {
@@ -83,24 +86,30 @@ class Database:
                 """
         }
 
-        existing_tables = self.execute_query("SHOW TABLES", fetch=True)
-        existing_tables = [table[0] for table in existing_tables]
+        try:
+            existing_tables = self.execute_query("SHOW TABLES", fetch=True)
+            existing_tables = [table[0] for table in existing_tables]
 
-        for table_name, table_query in required_tables.items():
-            if table_name in existing_tables:
-                logger.info(f"Table '{table_name}' exists.")
-            else:
-                self.execute_query(table_query)
-                logger.info(f"Table {table_name}' created")
+            for table_name, table_query in required_tables.items():
+                if table_name in existing_tables:
+                    logger.info(f"Table '{table_name}' exists.")
+                else:
+                    self.execute_query(table_query)
+                    logger.info(f"Table {table_name}' created")
+        except MySQLdb.Error as e:
+            logger.error(f"Error checking tables: {e}")
 
     def check_database(self):
-        self.cursor.execute(f"SHOW DATABASES LIKE '{self.database_name}'")
-        result = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"SHOW DATABASES LIKE '{self.database_name}'")
+            result = self.cursor.fetchone()
 
-        if result:
-            logger.info(f"Database '{self.database_name}' exists.")
-        else:
-            self.create_database()
+            if result:
+                logger.info(f"Database '{self.database_name}' exists.")
+            else:
+                self.create_database()
+        except MySQLdb.Error as e:
+            logger.error(f"Error checking database: {e}")
 
     def close_conn(self):
         if self.cursor:
