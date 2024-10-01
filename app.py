@@ -1,19 +1,15 @@
 from notes import Notes
 from database import Database
-from loguru import logger
+import logger
 from config import Config
-
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-LOG_DIR = "logs"
-
-config = Config()
-
-# Add logging using loguru
-logger.add(f"{LOG_DIR}/app.log", level=config.get('General', 'log_level'), rotation="6 hours", format="{time} {level} {message}")
 
 
 def main():
-    db = Database()
+    config = Config()
+    config.load_config()
+
+    logger.init_logger(config)
+    db = Database(config)
     notes = Notes()
 
 
