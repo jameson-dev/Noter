@@ -18,6 +18,16 @@ class Database:
         except Exception as e:
             logger.error(e)
 
+    def execute_query(self, query, fetch=False):
+        """Helper method to execute SQL queries"""
+        try:
+            logger.info(f"Executing SQL: {query}")
+            self.cursor.execute(query)
+            if fetch:
+                return self.cursor.fetchall()
+        except MySQLdb.Error as e:
+            logger.error("Error executing query: {e}")
+
     def create_database(self):
         self.cursor.execute(f"CREATE DATABASE {self.database_name}")
         logger.info(f"Database '{self.database_name}' has been created.")
