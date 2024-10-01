@@ -44,3 +44,10 @@ class Config:
     def get(self, section, option):
         return self.config.get(section, option)
 
+    def getint(self, section, option):
+        return self.config.getint(section, option)
+
+    def getboolean(self, section, option):
+        return self.config.getboolean(section, option)
+
+
