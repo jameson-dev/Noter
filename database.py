@@ -50,7 +50,7 @@ class Database:
             else:
                 self.create_tables(table_name, table_query)
 
-            print(f"Table '{table}' created.")
+        logger.info(f"Table '{table_name}' created.")
 
     def check_database(self):
         self.cursor.execute(f"SHOW DATABASES LIKE '{self.database_name}'")
