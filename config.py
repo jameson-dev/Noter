@@ -25,7 +25,7 @@ class Config:
 
         self.config['Database'] = {
             'db_host': 'localhost',
-            'db_user': '',
+            'db_username': '',
             'db_password': ''
         }
 
