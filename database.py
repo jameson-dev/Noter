@@ -25,14 +25,19 @@ class Database:
             self.cursor.execute(query)
             if fetch:
                 return self.cursor.fetchall()
+            self.connection.commit()
         except MySQLdb.Error as e:
-            logger.error("Error executing query: {e}")
+            logger.error(f"Error executing query: {e}")
 
     def create_database(self):
-        self.cursor.execute(f"CREATE DATABASE {self.database_name}")
-        logger.info(f"Database '{self.database_name}' has been created.")
+        try:
+            self.cursor.execute(f"CREATE DATABASE {self.database_name}")
+            logger.info(f"Database '{self.database_name}' has been created.")
+            self.connection.commit()
+        except MySQLdb.Error as e:
+            logger.error(f"Error creating database: {e}")
 
-    def create_tables(self, table_name, query):
+    def check_tables(self):
         required_tables = {
             'users': """
                 CREATE TABLE IF NOT EXISTS users (
@@ -48,43 +53,65 @@ class Database:
                     content TEXT,
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
+                """,
+            'tags': """
+                CREATE TABLE IF NOT EXISTS tags (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) UNIQUE NOT NULL
+                    )                        
+                """,
+            'note_tags': """
+                CREATE TABLE IF NOT EXISTS note_tags (
+                    note_id INT NOT NULL,
+                    tag_id INT NOT NULL,
+                    PRIMARY KEY (note_id, tag_id),
+                    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
+                    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+                    )
+                """,
+            'user_prefs': """
+                CREATE TABLE IF NOT EXISTS user_prefs (
+                    user_id INT NOT NULL,
+                    theme VARCHAR(50),
+                    notifs_enabled BOOLEAN DEFAULT TRUE,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                    )
+                """,
+            'audit_logs': """
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    action VARCHAR(255),
+                    action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
                 """
         }
 
-        existing_tables = self.execute_query("SHOW TABLES", fetch=True)
-        existing_tables = [table[0] for table in existing_tables]
+        try:
+            existing_tables = self.execute_query("SHOW TABLES", fetch=True)
+            existing_tables = [table[0] for table in existing_tables]
 
-        for table_name, table_query in required_tables.items():
-            if table_name in existing_tables:
-                logger.info(f"Table '{table_name} exists.")
-            else:
-                self.create_tables(table_name, table_query)
-
-        logger.info(f"Table '{table_name}' created.")
+            for table_name, table_query in required_tables.items():
+                if table_name in existing_tables:
+                    logger.info(f"Table '{table_name}' exists.")
+                else:
+                    self.execute_query(table_query)
+                    logger.info(f"Table {table_name}' created")
+        except MySQLdb.Error as e:
+            logger.error(f"Error checking tables: {e}")
 
     def check_database(self):
-        self.cursor.execute(f"SHOW DATABASES LIKE '{self.database_name}'")
-        result = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"SHOW DATABASES LIKE '{self.database_name}'")
+            result = self.cursor.fetchone()
 
-        if result:
-            logger.info(f"Database '{self.database_name}' exists.")
-        else:
-            self.create_database()
-
-    def check_tables(self):
-        required_tables = ['users', 'notes']
-
-        self.cursor.execute("SHOW TABLES")
-        existing_tables = [table[0] for table in self.cursor.fetchall()]
-
-        for table in required_tables:
-            if table in existing_tables:
-                logger.info(f"Table '{table}' exists.")
+            if result:
+                logger.info(f"Database '{self.database_name}' exists.")
             else:
-                if table == 'notes':
-                    self.create_tables(table)
-                elif table == 'users':
-                    self.create_tables(table)
+                self.create_database()
+        except MySQLdb.Error as e:
+            logger.error(f"Error checking database: {e}")
 
     def close_conn(self):
         if self.cursor:
