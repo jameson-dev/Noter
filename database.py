@@ -1,13 +1,18 @@
 import MySQLdb
 from loguru import logger
+from config import Config
+
+
+""" Add configuration file"""
+config = Config()
 
 
 class Database:
     def __init__(self):
         self.connection = MySQLdb.connect(
-            host='localhost',
-            user='',
-            passwd=''
+            host=config.get('Database', 'db_host'),
+            user=config.get('Database', 'db_username'),
+            passwd=config.get('Database', 'db_password')
         )
         self.cursor = self.connection.cursor()
         self.database_name = "notes"
