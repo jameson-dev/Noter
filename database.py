@@ -24,26 +24,33 @@ class Database:
         self.cursor.execute(f"CREATE DATABASE {self.database_name}")
         logger.info(f"Database '{self.database_name}' has been created.")
 
-    def create_tables(self, table):
-        if table == "users":
-            self.cursor.execute("""
+    def create_tables(self, table_name, query):
+        required_tables = {
+            'users': """
                 CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(255) UNIQUE NOT NULL,
                     password VARCHAR(255) NOT NULL
                     )
-                """)
-
-            logger.info(f"Table '{table}' created.")
-        if table == "notes":
-            self.cursor.execute("""
+                """,
+            'notes': """
                 CREATE TABLE IF NOT EXISTS notes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     user_id INT,
                     content TEXT,
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
-                """)
+                """
+        }
+
+        existing_tables = self.execute_query("SHOW TABLES", fetch=True)
+        existing_tables = [table[0] for table in existing_tables]
+
+        for table_name, table_query in required_tables.items():
+            if table_name in existing_tables:
+                logger.info(f"Table '{table_name} exists.")
+            else:
+                self.create_tables(table_name, table_query)
 
             print(f"Table '{table}' created.")
 
