@@ -25,6 +25,7 @@ class Database:
             self.cursor.execute(query)
             if fetch:
                 return self.cursor.fetchall()
+            self.connection.commit()
         except MySQLdb.Error as e:
             logger.error(f"Error executing query: {e}")
 
@@ -32,6 +33,7 @@ class Database:
         try:
             self.cursor.execute(f"CREATE DATABASE {self.database_name}")
             logger.info(f"Database '{self.database_name}' has been created.")
+            self.connection.commit()
         except MySQLdb.Error as e:
             logger.error(f"Error creating database: {e}")
 
