@@ -1,14 +1,8 @@
 import MySQLdb
 from loguru import logger
-from config import Config
-
-
-""" Add configuration file"""
-config = Config()
 
 
 class Database:
-    def __init__(self):
         self.connection = MySQLdb.connect(
             host=config.get('Database', 'db_host'),
             user=config.get('Database', 'db_username'),
@@ -19,6 +13,7 @@ class Database:
         self.check_database()
         self.connection.select_db(self.database_name)
         self.check_tables()
+    def __init__(self, config):
 
     def create_database(self):
         self.cursor.execute(f"CREATE DATABASE {self.database_name}")
