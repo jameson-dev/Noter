@@ -48,6 +48,38 @@ class Database:
                     content TEXT,
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
+                """,
+            'tags': """
+                CREATE TABLE IF NOT EXISTS tags (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) UNIQUE NOT NULL
+                    )                        
+                """,
+            'note_tags': """
+                CREATE TABLE IF NOT EXISTS note_tags (
+                    note_id INT NOT NULL,
+                    tag_id INT NOT NULL,
+                    PRIMARY KEY (note_id, tag_id),
+                    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
+                    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+                    )
+                """,
+            'user_prefs': """
+                CREATE TABLE IF NOT EXISTS user_prefs (
+                    user_id INT NOT NULL,
+                    theme VARCHAR(50),
+                    notifs_enabled BOOLEAN DEFAULT TRUE,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                    )
+                """,
+            'audit_logs': """
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    action VARCHAR(255),
+                    action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
                 """
         }
 
