@@ -30,4 +30,3 @@ class Notes:
         else:
             for i, note in enumerate(self.notes, 1):
                 logger.info(f"{i}: {note}")
-
